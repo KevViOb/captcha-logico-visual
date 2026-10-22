@@ -75,6 +75,7 @@ class GestorBloqueo:
     def __init__(self, ruta: Path = ARCHIVO_BLOQUEO) -> None:
         self.ruta = ruta
         self.bloqueado_hasta: datetime | None = self._leer()
+        self._recortar_bloqueo()
 
     # Devuelve cuánto falta para que termine el bloqueo, o None si no hay uno vigente
     def tiempo_restante(self) -> timedelta | None:
@@ -94,16 +95,7 @@ class GestorBloqueo:
         self.bloqueado_hasta = (
             datetime.now() + DURACION_BLOQUEO
         ).replace(microsecond=0)
-
-        estado = {"locked_until": self.bloqueado_hasta.isoformat()}
-
-        try:
-            self.ruta.parent.mkdir(parents=True, exist_ok=True)
-            self.ruta.write_text(json.dumps(estado, indent=4), encoding="utf-8")
-
-        except OSError as error:
-            # El bloqueo sigue activo en esta ejecución aunque no se pueda guardar
-            print(f"No se pudo guardar el bloqueo en {self.ruta}: {error}", file=sys.stderr)
+        self._guardar()
 
     # Se llama cuando el bloqueo ya venció
     def levantar(self) -> None:
@@ -115,6 +107,27 @@ class GestorBloqueo:
         except OSError as error:
             print(f"No se pudo borrar {self.ruta}: {error}", file=sys.stderr)
 
+    def _guardar(self) -> None:
+        estado = {"locked_until": self.bloqueado_hasta.isoformat()}
+
+        try:
+            self.ruta.parent.mkdir(parents=True, exist_ok=True)
+            self.ruta.write_text(json.dumps(estado, indent=4), encoding="utf-8")
+
+        except OSError as error:
+            # El bloqueo sigue activo en esta ejecución aunque no se pueda guardar
+            print(f"No se pudo guardar el bloqueo en {self.ruta}: {error}", file=sys.stderr)
+
+    # Un bloqueo guardado nunca puede durar más que DURACION_BLOQUEO desde ahora.
+    # Pasa si el archivo viene de una configuración anterior más larga o si se atrasó el reloj
+    def _recortar_bloqueo(self) -> None:
+        limite = (datetime.now() + DURACION_BLOQUEO).replace(microsecond=0)
+
+        if self.bloqueado_hasta is not None and self.bloqueado_hasta > limite:
+            self.bloqueado_hasta = limite
+            # Se guarda ya recortado para que reabrir el programa no reinicie la cuenta
+            self._guardar()
+
     # Un archivo dañado o editado a mano se ignora en vez de romper el programa
     def _leer(self) -> datetime | None:
         if not self.ruta.exists():
@@ -122,11 +135,17 @@ class GestorBloqueo:
 
         try:
             estado = json.loads(self.ruta.read_text(encoding="utf-8"))
-            return datetime.fromisoformat(estado["locked_until"])
+            fecha = datetime.fromisoformat(estado["locked_until"])
 
         except (OSError, json.JSONDecodeError, KeyError, TypeError, ValueError) as error:
             print(f"Archivo de bloqueo inválido ({self.ruta}): {error}", file=sys.stderr)
             return None
+
+        # Una fecha con zona horaria se pasa a hora local para poder compararla
+        if fecha.tzinfo is not None:
+            fecha = fecha.astimezone().replace(tzinfo=None)
+
+        return fecha
 
 
 class PartidaCaptcha:

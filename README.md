@@ -96,6 +96,7 @@ El bloqueo se guarda en `data/lock_state.json`, junto a `captcha.py`. La carpeta
 - **Al iniciar:** se revisa si el archivo existe y si el bloqueo sigue vigente.
 - **Si ya venció:** el archivo se borra.
 - **Si está dañado:** se ignora y el programa no se cae.
+- **Si la fecha guardada supera la duración configurada:** se recorta a 50 segundos desde ese momento y se vuelve a guardar. Esto puede pasar con un archivo de una configuración anterior más larga o si se atrasó el reloj del sistema.
 - **Para quitar el bloqueo durante pruebas:** borra ese archivo.
 
 ## Estructura del código
