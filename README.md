@@ -4,6 +4,14 @@ CAPTCHA de escritorio hecho en Python con Tkinter. Para distinguir a una persona
 
 Se usa como puerta de acceso. La aplicación protegida solo se abre si el usuario supera el desafío. Si lo cierra o falla, el acceso se niega.
 
+## Capturas
+
+| Ronda en curso | Respuesta correcta |
+|:---:|:---:|
+| ![Ronda 1 con la imagen de tijeras y el reloj en 12 segundos](docs/capturas/01-ronda.png) | ![Piedra elegida y marcada en verde: le gana a tijeras](docs/capturas/02-acierto.png) |
+| **Respuesta incorrecta** | **Bloqueo con cuenta regresiva** |
+| ![Piedra elegida contra papel y marcada en rojo](docs/capturas/03-error.png) | ![Pantalla de acceso bloqueado con 47 segundos restantes](docs/capturas/04-bloqueo.png) |
+
 ## Cómo funciona
 
 1. La ventana muestra **mi opción**: una de las tres imágenes, elegida al azar.
@@ -52,6 +60,8 @@ python captcha.py
 
 Al superar el CAPTCHA se abre una ventana de demostración llamada **Área Protegida**.
 
+<img src="docs/capturas/05-area-protegida.png" alt="Ventana Área Protegida con el mensaje Acceso concedido" width="400">
+
 El programa funciona igual desde VS Code (botón Run o Code Runner), IDLE, PyCharm o la terminal. Las rutas se calculan a partir de la ubicación del archivo y no de la carpeta desde donde se ejecuta.
 
 ## Integrarlo en otro programa
@@ -99,6 +109,15 @@ El bloqueo se guarda en `data/lock_state.json`, junto a `captcha.py`. La carpeta
 - **Si la fecha guardada supera la duración configurada:** se recorta a 50 segundos desde ese momento y se vuelve a guardar. Esto puede pasar con un archivo de una configuración anterior más larga o si se atrasó el reloj del sistema.
 - **Para quitar el bloqueo durante pruebas:** borra ese archivo.
 
+## Estructura del repositorio
+
+```text
+captcha.py               # el CAPTCHA completo, con las imágenes incluidas
+MANUAL_INTEGRACION.md    # cómo integrarlo en otro programa
+tests/                   # pruebas con pytest
+docs/capturas/           # imágenes de este README
+```
+
 ## Estructura del código
 
 | Elemento            | Responsabilidad |
@@ -110,6 +129,18 @@ El bloqueo se guarda en `data/lock_state.json`, junto a `captcha.py`. La carpeta
 | `cargar_imagenes()` | Decodificar las imágenes embebidas y ajustarlas al tamaño de cada zona. |
 | `verificar_acceso()`| El punto de entrada: muestra el CAPTCHA y devuelve `True` solo si se superó. |
 | `IMAGENES_CAPTCHA`  | Las tres imágenes en PNG codificadas en base64. |
+
+## Pruebas
+
+Las pruebas usan pytest y están en `tests/`:
+
+- **`test_logica.py`** cubre las reglas del juego, el marcador de la serie, el bloqueo persistente (formato, vencimiento, recorte, archivos dañados y zona horaria) y la validez de las imágenes embebidas. Usa un reloj falso, así que no espera en tiempo real.
+- **`test_interfaz.py`** prueba la ventana completa sin mostrarla: ganar, perder y quedar bloqueado, doble clic, tiempo agotado, bloqueo previo y cierre. Si no hay pantalla disponible, estas pruebas se omiten solas.
+
+```bash
+pip install pytest
+python -m pytest
+```
 
 ## Mecanismos de seguridad simulada
 
@@ -130,3 +161,7 @@ Es un proyecto académico que demuestra conceptos de autenticación y mitigació
 
 - Quien tenga acceso a la máquina puede borrar `lock_state.json` o adelantar el reloj del sistema.
 - Si se cierra la ventana a mitad de una serie, los errores de esa serie no se guardan. Solo se guarda el bloqueo.
+
+## Licencia
+
+Se distribuye bajo la [licencia MIT](LICENSE).
