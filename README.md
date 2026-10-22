@@ -76,7 +76,7 @@ if not verificar_acceso():
 # ... aquí arranca tu programa
 ```
 
-Los detalles, los ejemplos y la opción de pegarlo dentro de un solo archivo están en el [manual de integración](MANUAL_INTEGRACION.md).
+Los detalles, los ejemplos y la opción de pegarlo dentro de un solo archivo están en el [manual de integración](MANUAL_INTEGRACION.md). También hay una versión en [PDF](docs/Manual_Integracion_CAPTCHA.pdf) para descargar o imprimir.
 
 ## Configuración
 
@@ -115,7 +115,7 @@ El bloqueo se guarda en `data/lock_state.json`, junto a `captcha.py`. La carpeta
 captcha.py               # el CAPTCHA completo, con las imágenes incluidas
 MANUAL_INTEGRACION.md    # cómo integrarlo en otro programa
 tests/                   # pruebas con pytest
-docs/capturas/           # imágenes de este README
+docs/                    # manual en PDF y capturas de este README
 ```
 
 ## Estructura del código

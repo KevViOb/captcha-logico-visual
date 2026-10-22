@@ -2,6 +2,8 @@
 
 Cómo poner el CAPTCHA lógico visual delante de cualquier programa en Python.
 
+Hay una versión en PDF de este manual en [docs/Manual_Integracion_CAPTCHA.pdf](docs/Manual_Integracion_CAPTCHA.pdf).
+
 ## La función que se usa
 
 ```python
